@@ -132,7 +132,7 @@ export class WardenAPI {
       });
     } catch (error) {
       if (error instanceof WardenAPIError && error.statusCode === 404) {
-        return { error: 'Server not found' };
+        return { error: 'Server not found', data: undefined };
       }
       throw error;
     }
@@ -224,10 +224,10 @@ export class WardenAPI {
   }
 
   isServerFlagged(response: ServerLookupResponse): boolean {
-    return !response.error && !!response.data;
+    return !response.error && !!response.id;
   }
 
   isUserFlagged(response: UserLookupResponse): boolean {
-    return !response.error && !!response.data;
+    return !response.error && !!response.id;
   }
 } 

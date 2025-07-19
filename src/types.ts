@@ -23,6 +23,10 @@ export interface ApiResponse<T = any> {
   data?: T;
   error?: string;
   rateLimit?: RateLimitInfo;
+  status?: string;
+  type?: string;
+  name?: string;
+  id?: string;
 }
 
 export interface ServerLookupRequest {
