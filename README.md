@@ -324,11 +324,7 @@ client.on('guildCreate', async (guild) => {
 
 ## Getting Your API Key
 
-1. Visit [Warden API Dashboard](https://api.iitranq.co.uk)
-2. Sign in with your Discord account
-3. Navigate to the API Keys section
-4. Generate a new API key
-5. Copy the key (it starts with `wd_`)
+Getting an API Key is currently not available.
 
 ## Support
 

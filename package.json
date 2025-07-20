@@ -1,6 +1,6 @@
 {
   "name": "wardenapi",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Official JavaScript/TypeScript client for Warden API - FiveM server verification service",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -26,10 +26,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/wardenapi.git"
+    "url": "https://github.com/SSnowly/wardenapi.git"
   },
   "bugs": {
-    "url": "https://github.com/your-username/wardenapi/issues"
+    "url": "https://github.com/SSnowly/wardenapi/issues"
   },
   "homepage": "https://api.iitranq.co.uk",
   "dependencies": {},
