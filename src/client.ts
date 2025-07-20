@@ -191,27 +191,6 @@ export class WardenAPI {
     }
   }
 
-  async checkUserByUsername(username: string): Promise<UserLookupResponse> {
-    const request: UserLookupRequest = {
-      data: {
-        type: 'username',
-        username: username
-      }
-    };
-
-    try {
-      return await this.makeRequest<UserLookupResponse>('/user', {
-        method: 'POST',
-        body: JSON.stringify(request)
-      });
-    } catch (error) {
-      if (error instanceof WardenAPIError && error.statusCode === 404) {
-        return { error: 'User not found' };
-      }
-      throw error;
-    }
-  }
-
   async getServerInfo(serverId: string): Promise<ServerLookupResponse> {
     try {
       return await this.makeRequest<ServerLookupResponse>(`/server/${serverId}`);
@@ -223,11 +202,13 @@ export class WardenAPI {
     }
   }
 
-  isServerFlagged(response: ServerLookupResponse): boolean {
-    return !response.error && !!response.id;
+  async isServerFlagged(serverId: string): Promise<boolean> {
+    const response = await this.getServerInfo(serverId);
+    return !response.error && !!response?.id;
   }
 
-  isUserFlagged(response: UserLookupResponse): boolean {
-    return !response.error && !!response.id;
+  async isUserFlagged(userId: string): Promise<boolean> {
+    const response = await this.checkUserById(userId);
+    return !response.error && !!response?.id;
   }
 } 

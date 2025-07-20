@@ -31,7 +31,7 @@ const client = new WardenAPI({
 
 // Check if a server is flagged by Discord ID
 const serverResult = await client.checkServerById('123456789012345678');
-if (client.isServerFlagged(serverResult)) {
+if (await client.isServerFlagged('123456789012345678') || serverResult.id /* also works with the result itself, but isServerFlags works standalone aswell */) {
   console.log('Server is flagged:', serverResult.data);
 } else {
   console.log('Server is clean');
@@ -39,7 +39,7 @@ if (client.isServerFlagged(serverResult)) {
 
 // Check if a user is flagged by Discord ID
 const userResult = await client.checkUserById('123456789012345678');
-if (client.isUserFlagged(userResult)) {
+if (await client.isUserFlagged('123456789012345678') || userResult.id /* same as server one. */) {
   console.log('User is flagged:', userResult.data);
 } else {
   console.log('User is clean');
@@ -108,25 +108,20 @@ console.log(`Found ${result.data.found} flagged servers`);
 const result = await client.checkUserById('123456789012345678');
 ```
 
-#### Check User by Username
-```javascript
-const result = await client.checkUserByUsername('username123');
-```
-
 ### Utility Methods
 
 #### Check if Server is Flagged
 ```javascript
-const result = await client.checkServerById('123456789012345678');
-if (client.isServerFlagged(result)) {
+const isFlagged = await client.isServerFlagged('123456789012345678');
+if (isFlagged) {
   console.log('Server is flagged!');
 }
 ```
 
 #### Check if User is Flagged
 ```javascript
-const result = await client.checkUserById('123456789012345678');
-if (client.isUserFlagged(result)) {
+const isFlagged = await client.isUserFlagged('123456789012345678');
+if (isFlagged) {
   console.log('User is flagged!');
 }
 ```
@@ -136,16 +131,14 @@ if (client.isUserFlagged(result)) {
 ### Successful Server Response
 ```javascript
 {
-  data: {
-    id: "123456789012345678",
-    name: "Malicious Server",
-    description: "Known cheating server",
-    type: "CHEATING",
-    category: "FiveM",
-    flags: ["CHEATING", "MODIFIED_CLIENT"],
-    createdAt: "2024-01-01T00:00:00.000Z",
-    updatedAt: "2024-01-01T00:00:00.000Z"
-  },
+  id: "123456789012345678",
+  name: "Malicious Server",
+  description: "Known cheating server",
+  type: "CHEATING",
+  category: "FiveM",
+  flags: ["CHEATING", "MODIFIED_CLIENT"],
+  createdAt: "2024-01-01T00:00:00.000Z",
+  updatedAt: "2024-01-01T00:00:00.000Z",
   rateLimit: {
     limit: 100,
     remaining: 99,
@@ -157,15 +150,13 @@ if (client.isUserFlagged(result)) {
 ### Successful User Response
 ```javascript
 {
-  data: {
-    id: "123456789012345678",
-    username: "malicious_user",
-    avatar: "https://cdn.discordapp.com/avatars/...",
-    type: "CHEATER",
-    flags: ["CHEATING", "LEAKING"],
-    createdAt: "2024-01-01T00:00:00.000Z",
-    updatedAt: "2024-01-01T00:00:00.000Z"
-  },
+  id: "123456789012345678",
+  username: "malicious_user",
+  avatar: "https://cdn.discordapp.com/avatars/...",
+  type: "CHEATER",
+  flags: ["CHEATING", "LEAKING"],
+  createdAt: "2024-01-01T00:00:00.000Z",
+  updatedAt: "2024-01-01T00:00:00.000Z",
   rateLimit: {
     limit: 100,
     remaining: 99,
@@ -189,21 +180,19 @@ if (client.isUserFlagged(result)) {
 ### Batch Response
 ```javascript
 {
-  data: {
-    found: 2,
-    servers: [
-      {
-        id: "123456789012345678",
-        name: "Malicious Server 1",
-        type: "CHEATING"
-      },
-      {
-        id: "987654321098765432", 
-        name: "Malicious Server 2",
-        type: "LEAKING"
-      }
-    ]
-  },
+  found: 2,
+  servers: [
+    {
+      id: "123456789012345678",
+      name: "Malicious Server 1",
+      type: "CHEATING"
+    },
+    {
+      id: "987654321098765432", 
+      name: "Malicious Server 2",
+      type: "LEAKING"
+    }
+  ],
   rateLimit: {
     limit: 100,
     remaining: 98,
@@ -275,14 +264,14 @@ async function checkServer(serverId) {
   try {
     const result = await client.checkServerById(serverId);
     
-    if (client.isServerFlagged(result)) {
-      console.log(`⚠️  Server ${serverId} is flagged:`);
-      console.log(`   Type: ${result.data.type}`);
-      console.log(`   Flags: ${result.data.flags?.join(', ')}`);
-      return true;
-    } else {
+    if (result.error) {
       console.log(`✅ Server ${serverId} is clean`);
       return false;
+    } else {
+      console.log(`⚠️  Server ${serverId} is flagged:`);
+      console.log(`   Type: ${result.type}`);
+      console.log(`   Flags: ${result.flags?.join(', ')}`);
+      return true;
     }
   } catch (error) {
     console.error('Error checking server:', error.message);
@@ -300,13 +289,13 @@ async function checkMultipleServers(serverIds) {
     const result = await client.checkServers(servers);
     
     console.log(`Checked ${servers.length} servers`);
-    console.log(`Found ${result.data.found} flagged servers`);
+    console.log(`Found ${result.found} flagged servers`);
     
-    result.data.servers.forEach(server => {
+    result.servers.forEach(server => {
       console.log(`- ${server.name} (${server.id}): ${server.type}`);
     });
     
-    return result.data.servers;
+    return result.servers;
   } catch (error) {
     console.error('Batch check failed:', error.message);
     return [];
@@ -319,9 +308,9 @@ async function checkMultipleServers(serverIds) {
 // Example Discord.js integration
 client.on('guildCreate', async (guild) => {
   try {
-    const result = await wardenClient.checkServerById(guild.id);
+    const isFlagged = await wardenClient.isServerFlagged(guild.id);
     
-    if (wardenClient.isServerFlagged(result)) {
+    if (isFlagged) {
       console.log(`⚠️  Joined flagged server: ${guild.name}`);
       
       // Optionally leave the server
