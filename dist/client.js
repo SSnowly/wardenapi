@@ -154,26 +154,6 @@ class WardenAPI {
             throw error;
         }
     }
-    async checkUserByUsername(username) {
-        const request = {
-            data: {
-                type: 'username',
-                username: username
-            }
-        };
-        try {
-            return await this.makeRequest('/user', {
-                method: 'POST',
-                body: JSON.stringify(request)
-            });
-        }
-        catch (error) {
-            if (error instanceof types_1.WardenAPIError && error.statusCode === 404) {
-                return { error: 'User not found' };
-            }
-            throw error;
-        }
-    }
     async getServerInfo(serverId) {
         try {
             return await this.makeRequest(`/server/${serverId}`);
@@ -185,11 +165,13 @@ class WardenAPI {
             throw error;
         }
     }
-    isServerFlagged(response) {
-        return !response.error && !!response.id;
+    async isServerFlagged(serverId) {
+        const response = await this.getServerInfo(serverId);
+        return !response.error && !!(response === null || response === void 0 ? void 0 : response.id);
     }
-    isUserFlagged(response) {
-        return !response.error && !!response.id;
+    async isUserFlagged(userId) {
+        const response = await this.checkUserById(userId);
+        return !response.error && !!(response === null || response === void 0 ? void 0 : response.id);
     }
 }
 exports.WardenAPI = WardenAPI;

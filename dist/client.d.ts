@@ -13,9 +13,8 @@ export declare class WardenAPI {
         name?: string;
     }>): Promise<BatchServerLookupResponse>;
     checkUserById(userId: string): Promise<UserLookupResponse>;
-    checkUserByUsername(username: string): Promise<UserLookupResponse>;
     getServerInfo(serverId: string): Promise<ServerLookupResponse>;
-    isServerFlagged(response: ServerLookupResponse): boolean;
-    isUserFlagged(response: UserLookupResponse): boolean;
+    isServerFlagged(serverId: string): Promise<boolean>;
+    isUserFlagged(userId: string): Promise<boolean>;
 }
 //# sourceMappingURL=client.d.ts.map
